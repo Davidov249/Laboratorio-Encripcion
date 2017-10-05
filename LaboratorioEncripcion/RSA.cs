@@ -10,7 +10,7 @@ namespace LaboratorioEncripcion
     {
         public int P { get; private set; }
         public int Q { get; private set; }
-        public int N { get; private set; }
+        public int n { get; private set; }
         public int Fi { get; private set; }
         public int e { get; private set; }
         public int d { get; private set; }
@@ -23,7 +23,7 @@ namespace LaboratorioEncripcion
 
         public void Obtenern()
         {
-            N = P * Q;
+            n = P * Q;
         }
 
         public void Obtenerfi()
@@ -36,6 +36,24 @@ namespace LaboratorioEncripcion
             e = numero;
         }
 
+        public void Obtenerd()
+        {
+            d = 1;
+            while ((e*d)%Fi != 1)
+            {
+                d++;
+            }
+        }
+
+        public double Encriptar(int N)
+        {
+            return Math.Pow(N, e) % n;
+        }
+
+        public double Desencriptar(int C)
+        {
+            return Math.Pow(C, d) % n;
+        }
 
 
     }
