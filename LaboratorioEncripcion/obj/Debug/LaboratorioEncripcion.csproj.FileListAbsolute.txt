@@ -1,0 +1,6 @@
+C:\Users\Axel Rodriguez\Documents\Laboratorios\Laboratorio-Encripcion\LaboratorioEncripcion\bin\Debug\LaboratorioEncripcion.exe.config
+C:\Users\Axel Rodriguez\Documents\Laboratorios\Laboratorio-Encripcion\LaboratorioEncripcion\bin\Debug\LaboratorioEncripcion.exe
+C:\Users\Axel Rodriguez\Documents\Laboratorios\Laboratorio-Encripcion\LaboratorioEncripcion\bin\Debug\LaboratorioEncripcion.pdb
+C:\Users\Axel Rodriguez\Documents\Laboratorios\Laboratorio-Encripcion\LaboratorioEncripcion\obj\Debug\LaboratorioEncripcion.csprojResolveAssemblyReference.cache
+C:\Users\Axel Rodriguez\Documents\Laboratorios\Laboratorio-Encripcion\LaboratorioEncripcion\obj\Debug\LaboratorioEncripcion.exe
+C:\Users\Axel Rodriguez\Documents\Laboratorios\Laboratorio-Encripcion\LaboratorioEncripcion\obj\Debug\LaboratorioEncripcion.pdb
