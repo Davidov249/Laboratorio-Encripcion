@@ -4,3 +4,10 @@ C:\Users\Axel Rodriguez\Documents\Laboratorios\Laboratorio-Encripcion\Laboratori
 C:\Users\Axel Rodriguez\Documents\Laboratorios\Laboratorio-Encripcion\LaboratorioEncripcion\obj\Debug\LaboratorioEncripcion.csprojResolveAssemblyReference.cache
 C:\Users\Axel Rodriguez\Documents\Laboratorios\Laboratorio-Encripcion\LaboratorioEncripcion\obj\Debug\LaboratorioEncripcion.exe
 C:\Users\Axel Rodriguez\Documents\Laboratorios\Laboratorio-Encripcion\LaboratorioEncripcion\obj\Debug\LaboratorioEncripcion.pdb
+C:\Users\jose\Documents\GitHub\Laboratorio-Encripcion\LaboratorioEncripcion\bin\Debug\LaboratorioEncripcion.exe.config
+C:\Users\jose\Documents\GitHub\Laboratorio-Encripcion\LaboratorioEncripcion\bin\Debug\LaboratorioEncripcion.exe
+C:\Users\jose\Documents\GitHub\Laboratorio-Encripcion\LaboratorioEncripcion\bin\Debug\LaboratorioEncripcion.pdb
+C:\Users\jose\Documents\GitHub\Laboratorio-Encripcion\LaboratorioEncripcion\obj\Debug\LaboratorioEncripcion.csprojResolveAssemblyReference.cache
+C:\Users\jose\Documents\GitHub\Laboratorio-Encripcion\LaboratorioEncripcion\obj\Debug\LaboratorioEncripcion.csproj.CoreCompileInputs.cache
+C:\Users\jose\Documents\GitHub\Laboratorio-Encripcion\LaboratorioEncripcion\obj\Debug\LaboratorioEncripcion.exe
+C:\Users\jose\Documents\GitHub\Laboratorio-Encripcion\LaboratorioEncripcion\obj\Debug\LaboratorioEncripcion.pdb

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Cryptography;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,18 +12,49 @@ namespace LaboratorioEncripcion
         public int P { get; private set; }
         public int Q { get; private set; }
         public int n { get; private set; }
-        public int Fi { get; private set; }
-        public int e { get; private set; }
-        public int d { get; private set; }
+        public double Fi { get; private set; }
+        public double e { get; private set; }
+        public double d { get; private set; }
 
         public RSA(int p, int q)
         {
+            MD5 hashMD5 = MD5.Create();
             P = p;
             Q = q;
-            Obtenern();
-            Obtenerfi();
-            Obtenere(3);
-            Obtenerd();
+            try
+            {
+                Obtenern();
+                Obtenerfi();
+                Obtenere(3);
+                Obtenerd();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            
+
+        }
+
+        public string llavePublica()
+        {
+            MD5 hashMD5 = MD5.Create();
+            Hexadecimal hex = new Hexadecimal(n);
+            Hexadecimal hex2 = new Hexadecimal(Convert.ToInt32(e));
+            string llavepublica = hex.getHexadecimal() + hex2.getHexadecimal();
+
+            return Hashear(hashMD5, llavepublica);
+        }
+
+        public string llavePrivada()
+        {
+            MD5 hashMD5 = MD5.Create();
+            Hexadecimal hex = new Hexadecimal(n);
+            Hexadecimal hex2 = new Hexadecimal(Convert.ToInt32(d));
+            string llaveprivada = hex.getHexadecimal() + hex2.getHexadecimal();
+
+            return Hashear(hashMD5, llaveprivada);
         }
 
         public bool VerificarPrimos(int p, int q)
@@ -43,7 +75,19 @@ namespace LaboratorioEncripcion
                     var2++;
                 }
             }
-            if (var == 2 && var2 == 2)
+            if (p == 1 && q == 1)
+            {
+                return true;
+            }
+            else if (p == 1 && var2 == 2)
+            {
+                return true;
+            }
+            else if (var == 2 && q == 1)
+            {
+                return true;
+            }
+            else if (var == 2 && var2 == 2)
             {
                 return true;
             }
@@ -71,7 +115,7 @@ namespace LaboratorioEncripcion
         public void Obtenerd()
         {
             d = 1;
-            while ((e*d)%Fi != 1)
+            while ((e * d) % Fi != 1)
             {
                 d++;
             }
@@ -87,6 +131,15 @@ namespace LaboratorioEncripcion
             return Math.Pow(C, d) % n;
         }
 
-
+        public string Hashear(MD5 hasher, string entrada)
+        {
+            byte[] datos = hasher.ComputeHash(Encoding.UTF8.GetBytes(entrada));
+            StringBuilder hashed = new StringBuilder();
+            for (int i = 0; i < datos.Length; i++)
+            {
+                hashed.Append(datos[i].ToString("x2"));
+            }
+            return hashed.ToString();
+        }
     }
 }
