@@ -5,7 +5,7 @@ namespace LaboratorioEncripcion
 {
     public class BloqueAES
     {
-        Hexadecimal[,] valores { get; set; }
+        public Hexadecimal[,] valores { get; set; }
 
         public BloqueAES(char[] caracteres)
         {
@@ -33,6 +33,21 @@ namespace LaboratorioEncripcion
                     }
                 }
             }
+        }
+
+        public BloqueAES(Hexadecimal[,] matriz)
+        {
+            valores = matriz;
+        }
+
+        public Hexadecimal[] getVector(int columna)
+        {
+            Hexadecimal[] retorno = new Hexadecimal[4];
+            for (int i = 0; i < 4; i++)
+            {
+                retorno[i] = valores[i, columna];
+            }
+            return retorno;
         }
     }
 }

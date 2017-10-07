@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,13 +9,20 @@ namespace LaboratorioEncripcion
 {
     public class Hexadecimal
     {
-        public String ValorHex { get; set; }
+        private String ValorHex { get; set; }
 
-        public int ValorDec { get; set; }
+        private int ValorDec { get; set; }
+
+        private int ValorBit { get; set; }
 
         public Hexadecimal(int valorDecimal)
         {
             ValorDec = valorDecimal;
+        }
+
+        public Hexadecimal(String valorHexadecimal)
+        {
+            ValorHex = valorHexadecimal;
         }
 
         public int getDecimal()
@@ -27,6 +35,21 @@ namespace LaboratorioEncripcion
         public String getHexadecimal()
         {
             return Convert.ToString(Convert.ToInt32(ValorDec), 16).ToUpper();
+        }
+
+        public BitArray getBits()
+        {
+            byte[] datos = new byte[2];
+            for (int i = 0; i < ValorHex.Length; i++)
+            {
+                datos[i] = Convert.ToByte(ValorHex[i]);
+            }
+            if (ValorHex.Length < 2)
+            {
+                datos[1] = datos[0];
+                datos[0] = 0;
+            }
+            return new BitArray(datos);
         }
     }
 }
