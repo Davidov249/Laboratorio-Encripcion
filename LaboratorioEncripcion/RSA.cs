@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace LaboratorioEncripcion
 {
-    class RSA
+    public class RSA
     {
         public int P { get; private set; }
         public int Q { get; private set; }
@@ -19,6 +19,10 @@ namespace LaboratorioEncripcion
         {
             P = p;
             Q = q;
+            Obtenern();
+            Obtenerfi();
+            Obtenere(p);
+            Obtenerd();
         }
 
         public void Obtenern()
