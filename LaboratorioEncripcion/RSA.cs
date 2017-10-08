@@ -21,20 +21,11 @@ namespace LaboratorioEncripcion
             MD5 hashMD5 = MD5.Create();
             P = p;
             Q = q;
-            try
-            {
-                Obtenern();
-                Obtenerfi();
-                Obtenere(3);
-                Obtenerd();
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-            
-
+            Obtenern();
+            Obtenerfi();
+            Obtenere(3);
+            Obtenerd();
+            //VerificarPrimos(p, q);
         }
 
         public string llavePublica()
@@ -67,14 +58,12 @@ namespace LaboratorioEncripcion
                 {
                     var++;
                 }
-            }
-            for (int i = 1; i < q + 1; i++)
-            {
                 if (p % i == 0)
                 {
                     var2++;
                 }
             }
+
             if (p == 1 && q == 1)
             {
                 return true;
