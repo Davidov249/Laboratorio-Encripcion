@@ -51,5 +51,12 @@ namespace LaboratorioEncripcion
             }
             return new BitArray(datos);
         }
+
+        public String getString()
+        {
+            int dato = getDecimal();
+            String datoS = ((char) dato).ToString();
+            return datoS;
+        }
     }
 }
