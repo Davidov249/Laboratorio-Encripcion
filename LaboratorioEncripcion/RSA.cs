@@ -130,5 +130,48 @@ namespace LaboratorioEncripcion
             }
             return hashed.ToString();
         }
+
+        public double INV(double e, double fi)
+        {
+            double d = 0;
+            double x1 = 0;
+            double x2 = 1;
+            double y1 = 1;
+            double fitemp = fi;
+
+            while (e > 0)
+            {
+                double temp1 = fitemp / e;
+                double temp2 = fitemp - temp1 * e;
+                fitemp = e;
+                e = temp2;
+                double x = x2 - temp1 * x1;
+                double y = d - temp1 * y1;
+                x2 = x1;
+                x1 = x;
+                d = y1;
+                y1 = y;
+            }
+
+            if (fitemp == 1)
+            {
+                return d + fi;
+            }
+            else
+            {
+                return 0;
+            }
+
+        }
+
+        public double Euclids(double a, double b)
+        {
+            while (b != 0)
+            {
+                a = b % b;
+                b = a % b;
+            }
+            return a;
+        }
     }
 }
