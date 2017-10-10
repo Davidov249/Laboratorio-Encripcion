@@ -11,6 +11,7 @@ namespace LaboratorioEncripcion
         private List<BloqueAES> Bloques { get; set; }
         private BloqueAES Clave { get; set; }
         private List<BloqueAES> SubClaves { get; set; }
+        private BloqueAES TransformacionDinamica { get; set; }
         private string[,] sBox =
         {
             { "  ", "00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "0a", "0b", "0c", "0d", "0e", "0f" },
@@ -39,6 +40,14 @@ namespace LaboratorioEncripcion
             { "00", "00", "00", "00", "00", "00", "00", "00", "00", "00"},
         };
 
+        private string[,] transformacion =
+        {
+            { "02", "01", "01", "03" },
+            { "03", "02", "01", "01" },
+            { "01", "03", "02", "01" },
+            { "01", "01", "03", "02" }
+        };
+
         public AES_128(string archivo, string clave)
         {
             MD5 hashMD5 = MD5.Create();
@@ -50,7 +59,53 @@ namespace LaboratorioEncripcion
             }
             Clave = new BloqueAES(claveChars);
             GenerarSubClaves(Clave, 0, 0);
+            inicializarTransformacion();
+            for (int i = 0; i < Bloques.Count; i++)
+            {
+                RondaInicial(Bloques[i], Clave);
+            }
+        }
 
+        private void RondaInicial(BloqueAES bloque, BloqueAES clave)
+        {
+            bloque = AddRoundKey(bloque, clave);
+            RondasEstandar(bloque, 0);
+        }
+
+        private void RondasEstandar(BloqueAES bloque, int pasada)
+        {
+            bloque = SubBytes(bloque);
+            bloque = ShiftRows(bloque);
+            bloque = MixColumns(bloque);
+            bloque = AddRoundKey(bloque, SubClaves[pasada]);
+            if (pasada < 9)
+            {
+                RondasEstandar(bloque, pasada++);
+            }
+            else
+            {
+
+            }
+        }
+
+        private void RondaFinal(BloqueAES bloque)
+        {
+            bloque = SubBytes(bloque);
+            bloque = ShiftRows(bloque);
+            bloque = AddRoundKey(bloque, SubClaves[SubClaves.Count - 1]);
+        }
+
+        private void inicializarTransformacion()
+        {
+            Hexadecimal[,] matrizHexa = new Hexadecimal[4, 4];
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    matrizHexa[i, j] = new Hexadecimal(transformacion[i, j]);
+                }
+            }
+            TransformacionDinamica = new BloqueAES(matrizHexa);
         }
 
         public BitArray PasarBit(String hex)
@@ -97,6 +152,82 @@ namespace LaboratorioEncripcion
             {
                 GenerarSubClaves(SubClaves[SubClaves.Count - 1], 0, subClave++);
             }
+        }
+
+        public BloqueAES SubBytes(BloqueAES bloque)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    bloque.valores[i, j] = new Hexadecimal(buscarSBox(bloque.valores[i, j].getHexadecimal()));
+                }
+            }
+            return bloque;
+        }
+
+        public BloqueAES ShiftRows(BloqueAES bloque)
+        {
+            Hexadecimal temp = null;
+            int rotaciones = 1;
+            // Maneja la fila
+            for (int i = 1; i < 4; i++)
+            {
+                // Controla la cantidad de rotaciones
+                for (int k = 0; k < rotaciones; k++)
+                {
+                    // Se aplica la rotación
+                    for (int j = 1; j < 4; j++)
+                    {
+                        switch (j)
+                        {
+                            case 0:
+                                temp = bloque.valores[i, j];
+                                break;
+                            case 3:
+                                bloque.valores[i, j] = temp;
+                                break;
+                            default:
+                                bloque.valores[i, j - 1] = bloque.valores[i, j];
+                                break;
+                        }
+                    }
+                }
+                rotaciones++;
+            }
+            return bloque;
+        }
+
+        public BloqueAES MixColumns(BloqueAES bloque)
+        {
+            int datoCalculado = 0;
+            for (int f = 0; f < 4; f++)
+            {
+                for (int c  = 0; c < 4; c++)
+                {
+                    for (int i = 0; i < 4; i++)
+                    {
+                        for (int j = 0; j < 4; j++)
+                        {
+                            datoCalculado += (bloque.valores[i, j].getDecimal() * TransformacionDinamica.valores[j, i].getDecimal());
+                        }
+                    }
+                    bloque.valores[f, c] = new Hexadecimal(datoCalculado);
+                }
+            }
+            return bloque;
+        }
+
+        public BloqueAES AddRoundKey(BloqueAES bloque, BloqueAES clave)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    bloque.valores[i, j] = new Hexadecimal(getStringBit(XOR(bloque.valores[i, j].getBits(), clave.valores[i, j].getBits())));
+                }
+            }
+            return bloque;
         }
 
         public void rotarVector(ref Hexadecimal[] vectorFinal, Hexadecimal[] vectorInicial)
@@ -165,6 +296,22 @@ namespace LaboratorioEncripcion
                 hashed.Append(datos[i].ToString("x2"));
             }
             return hashed.ToString();
+        }
+
+        public String Cifrar()
+        {
+            StringBuilder Cifrado = new StringBuilder();
+            for (int i = 0; i < Bloques.Count; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    for (int k = 0; k < 4; k++)
+                    {
+                        Cifrado.Append(Bloques[i].valores[j, k].getString());
+                    }
+                }
+            }
+            return Cifrado.ToString();
         }
     }
 }
