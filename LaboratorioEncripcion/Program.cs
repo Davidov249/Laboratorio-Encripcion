@@ -12,7 +12,7 @@ namespace LaboratorioEncripcion
         {
             char[] caracteres = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' };
             BloqueAES bloque = new BloqueAES(caracteres);
-            RSA Privada = new RSA(1117, 1123);
+            RSA Privada = new RSA(17, 23);
             string llave = Privada.llavePrivada();
             Console.ReadKey();
         }

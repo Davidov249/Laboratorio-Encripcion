@@ -99,15 +99,25 @@ namespace LaboratorioEncripcion
         public void Obtenere(int numero)
         {
             e = numero;
+            e = Fi - 1;
+            //Random azar = new Random();
+            //e = azar.Next(1, Convert.ToInt32(Fi));
+            //double g = Euclids(e, Fi);
+            //while (g != 1)
+            //{
+            //    e = azar.Next(1, Convert.ToInt32(Fi));
+            //    g = Euclids(e, Fi);
+            //}
+
         }
 
         public void Obtenerd()
         {
-            d = 1;
-            while ((e * d) % Fi != 1)
-            {
-                d++;
-            }
+            d = INV(e, Fi);
+            //while ((e * d) % Fi != 1)
+            //{
+            //    d++;
+            //}
         }
 
         public double Encriptar(int N)
