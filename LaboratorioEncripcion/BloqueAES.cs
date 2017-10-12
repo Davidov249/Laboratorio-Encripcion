@@ -23,11 +23,11 @@ namespace LaboratorioEncripcion
                     {
                         if (cont > caracteres.Length)
                         {
-                            valores[j, i] = new Hexadecimal((int) ' ');
+                            valores[j, i] = new Hexadecimal((int)' ');
                         }
                         else
                         {
-                            valores[j, i] = new Hexadecimal((int) caracteres[cont]);
+                            valores[j, i] = new Hexadecimal((int)caracteres[cont]);
                             cont++;
                         }
                     }

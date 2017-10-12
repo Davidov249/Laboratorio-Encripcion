@@ -25,7 +25,6 @@ namespace LaboratorioEncripcion
             Obtenerfi();
             Obtenere(3);
             Obtenerd();
-            //VerificarPrimos(p, q);
         }
 
         public string llavePublica()

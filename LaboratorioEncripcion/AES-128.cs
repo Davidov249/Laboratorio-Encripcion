@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -48,7 +49,7 @@ namespace LaboratorioEncripcion
             { "01", "01", "03", "02" }
         };
 
-        public AES_128(string archivo, string clave)
+        public AES_128(string archivo, string clave, bool cifrar)
         {
             MD5 hashMD5 = MD5.Create();
             string claveHash = Hashear(hashMD5, clave);
@@ -58,41 +59,41 @@ namespace LaboratorioEncripcion
                 claveChars[i] = clave[i];
             }
             Clave = new BloqueAES(claveChars);
+            SubClaves = new List<BloqueAES>();
+            Bloques = new List<BloqueAES>();
+            StreamReader lector = new StreamReader(archivo);
+            char caracter = (char)lector.Read();
+            int contador = 0;
+            char[] caracteres = new char[16];
+            while (caracter.ToString() != "\uffff")
+            {
+                if (contador == 15)
+                {
+                    contador = -1;
+                    Bloques.Add(new BloqueAES(caracteres));
+                    caracteres = new char[16];
+                }
+                else
+                {
+                    caracteres[contador] = caracter;
+                }
+                contador++;
+                caracter = (char)lector.Read();
+            }
+            if (contador < 15)
+            {
+                for (int i = contador; i <= 15; i++)
+                {
+                    caracteres[i] = ' ';
+                }
+                Bloques.Add(new BloqueAES(caracteres));
+            }
             GenerarSubClaves(Clave, 0, 0);
             inicializarTransformacion();
             for (int i = 0; i < Bloques.Count; i++)
             {
                 RondaInicial(Bloques[i], Clave);
             }
-        }
-
-        private void RondaInicial(BloqueAES bloque, BloqueAES clave)
-        {
-            bloque = AddRoundKey(bloque, clave);
-            RondasEstandar(bloque, 0);
-        }
-
-        private void RondasEstandar(BloqueAES bloque, int pasada)
-        {
-            bloque = SubBytes(bloque);
-            bloque = ShiftRows(bloque);
-            bloque = MixColumns(bloque);
-            bloque = AddRoundKey(bloque, SubClaves[pasada]);
-            if (pasada < 9)
-            {
-                RondasEstandar(bloque, pasada++);
-            }
-            else
-            {
-
-            }
-        }
-
-        private void RondaFinal(BloqueAES bloque)
-        {
-            bloque = SubBytes(bloque);
-            bloque = ShiftRows(bloque);
-            bloque = AddRoundKey(bloque, SubClaves[SubClaves.Count - 1]);
         }
 
         private void inicializarTransformacion()
@@ -148,12 +149,46 @@ namespace LaboratorioEncripcion
                 posicion++; anteriorClaveActual++;
             }
             SubClaves.Add(new BloqueAES(subclave));
-            if (subClave < 10)
+            if (subClave < 9)
             {
-                GenerarSubClaves(SubClaves[SubClaves.Count - 1], 0, subClave++);
+                subClave = subClave + 1;
+                GenerarSubClaves(SubClaves[SubClaves.Count - 1], 0, subClave);
             }
         }
 
+        #region Rondas
+        private void RondaInicial(BloqueAES bloque, BloqueAES clave)
+        {
+            bloque = AddRoundKey(bloque, clave);
+            RondasEstandar(bloque, 0);
+        }
+
+        private void RondasEstandar(BloqueAES bloque, int pasada)
+        {
+            bloque = SubBytes(bloque);
+            bloque = ShiftRows(bloque);
+            bloque = MixColumns(bloque);
+            bloque = AddRoundKey(bloque, SubClaves[pasada]);
+            if (pasada < 9)
+            {
+                pasada++;
+                RondasEstandar(bloque, pasada);
+            }
+            else
+            {
+                RondaFinal(bloque);
+            }
+        }
+
+        private void RondaFinal(BloqueAES bloque)
+        {
+            bloque = SubBytes(bloque);
+            bloque = ShiftRows(bloque);
+            bloque = AddRoundKey(bloque, SubClaves[SubClaves.Count - 1]);
+        }
+        #endregion Rondas
+
+        #region Proceso de las Rondas
         public BloqueAES SubBytes(BloqueAES bloque)
         {
             for (int i = 0; i < 4; i++)
@@ -203,7 +238,7 @@ namespace LaboratorioEncripcion
             int datoCalculado = 0;
             for (int f = 0; f < 4; f++)
             {
-                for (int c  = 0; c < 4; c++)
+                for (int c = 0; c < 4; c++)
                 {
                     for (int i = 0; i < 4; i++)
                     {
@@ -229,6 +264,7 @@ namespace LaboratorioEncripcion
             }
             return bloque;
         }
+        #endregion Proceso de las Rondas
 
         public void rotarVector(ref Hexadecimal[] vectorFinal, Hexadecimal[] vectorInicial)
         {
