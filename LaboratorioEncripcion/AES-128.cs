@@ -9,6 +9,7 @@ namespace LaboratorioEncripcion
 {
     public class AES_128
     {
+        #region Variables Globales
         private List<BloqueAES> Bloques { get; set; }
         private BloqueAES Clave { get; set; }
         private List<BloqueAES> SubClaves { get; set; }
@@ -33,7 +34,7 @@ namespace LaboratorioEncripcion
             { "e0", "e1", "f8", "98", "11", "69", "d9", "8e", "94", "9b", "1e", "87", "e9", "ce", "55", "28", "df" },
             { "f0", "8c", "a1", "89", "0d", "bf", "e6", "42", "68", "41", "99", "2d", "0f", "b0", "54", "bb", "16" }
         };
-        private string[,] rcorn =
+        private string[,] rcon =
         {
             { "01", "02", "04", "08", "10", "20", "40", "80", "1b", "36"},
             { "00", "00", "00", "00", "00", "00", "00", "00", "00", "00"},
@@ -48,8 +49,52 @@ namespace LaboratorioEncripcion
             { "01", "03", "02", "01" },
             { "01", "01", "03", "02" }
         };
+        #endregion Variables Globales
 
-        public AES_128(string archivo, string clave, bool cifrar)
+        public AES_128(String archivo, String clave, bool cifrar)
+        {
+            Bloques = new List<BloqueAES>();
+            inicializarTransformacion();
+            GenerarBloques(archivo);
+            GenerarClaves(clave);
+        }
+
+        #region Generadores
+        public void GenerarBloques(String archivo)
+        {
+            StreamReader lector = new StreamReader(archivo);
+            char caracter = (char)lector.Read();
+            int contador = 0;
+            char[] caracteres = new char[16];
+            bool faltan = false;
+            while (caracter.ToString() != "\uffff")
+            {
+                if (contador == 15)
+                {
+                    contador = -1;
+                    Bloques.Add(new BloqueAES(caracteres));
+                    caracteres = new char[16];
+                    faltan = false;
+                }
+                else
+                {
+                    caracteres[contador] = caracter;
+                    faltan = true;
+                }
+                contador++;
+                caracter = (char)lector.Read();
+            }
+            if (faltan)
+            {
+                for (int i = contador; i <= 15; i++)
+                {
+                    caracteres[i] = ' ';
+                }
+                Bloques.Add(new BloqueAES(caracteres));
+            }
+        }
+
+        public void GenerarClaves(String clave)
         {
             MD5 hashMD5 = MD5.Create();
             string claveHash = Hashear(hashMD5, clave);
@@ -60,103 +105,53 @@ namespace LaboratorioEncripcion
             }
             Clave = new BloqueAES(claveChars);
             SubClaves = new List<BloqueAES>();
-            Bloques = new List<BloqueAES>();
-            StreamReader lector = new StreamReader(archivo);
-            char caracter = (char)lector.Read();
-            int contador = 0;
-            char[] caracteres = new char[16];
-            while (caracter.ToString() != "\uffff")
-            {
-                if (contador == 15)
-                {
-                    contador = -1;
-                    Bloques.Add(new BloqueAES(caracteres));
-                    caracteres = new char[16];
-                }
-                else
-                {
-                    caracteres[contador] = caracter;
-                }
-                contador++;
-                caracter = (char)lector.Read();
-            }
-            if (contador < 15)
-            {
-                for (int i = contador; i <= 15; i++)
-                {
-                    caracteres[i] = ' ';
-                }
-                Bloques.Add(new BloqueAES(caracteres));
-            }
-            GenerarSubClaves(Clave, 0, 0);
-            inicializarTransformacion();
-            for (int i = 0; i < Bloques.Count; i++)
-            {
-                RondaInicial(Bloques[i], Clave);
-            }
+            GenerarSubClaves(Clave, 0);
         }
 
-        private void inicializarTransformacion()
+        public void GenerarSubClaves(BloqueAES ClaveAnterior, int subClave)
         {
-            Hexadecimal[,] matrizHexa = new Hexadecimal[4, 4];
-            for (int i = 0; i < 4; i++)
+            Hexadecimal[] ultimaColumna = Rotword(ClaveAnterior.getVector(3));
+            ultimaColumna = SubBytes(ultimaColumna);
+            String transformacion = null;
+            for (int i = 0; i < ultimaColumna.Length; i++)
             {
-                for (int j = 0; j < 4; j++)
-                {
-                    matrizHexa[i, j] = new Hexadecimal(transformacion[i, j]);
-                }
+                transformacion = getXor(ultimaColumna[i].getBits(), getBit(rcon[i, subClave]));
+                ultimaColumna[i] = new Hexadecimal(transformacion);
             }
-            TransformacionDinamica = new BloqueAES(matrizHexa);
-        }
-
-        public BitArray PasarBit(String hex)
-        {
-            byte[] datos = new byte[2];
-            for (int i = 0; i < hex.Length; i++)
-            {
-                datos[i] = Convert.ToByte(hex[i]);
-            }
-            if (hex.Length < 2)
-            {
-                datos[1] = datos[0];
-                datos[0] = 0;
-            }
-            return new BitArray(datos);
-        }
-
-        public void GenerarSubClaves(BloqueAES ClaveAnterior, int posicion, int subClave)
-        {
-            // Primera Columna
-            Hexadecimal[] vectorRotar = new Hexadecimal[4];
-            rotarVector(ref vectorRotar, ClaveAnterior.getVector(3));
-            Hexadecimal[,] subclave = new Hexadecimal[4, 4];
-            String[] hexTemp = new String[4];
-            for (int i = 0; i < 4; i++)
-            {
-                hexTemp[i] = buscarSBox(vectorRotar[i].getHexadecimal());
-                hexTemp[i] = getStringBit(XOR(PasarBit(hexTemp[i]), ClaveAnterior.valores[i, posicion].getBits()));
-                subclave[i, 0] = new Hexadecimal(getStringBit(XOR(PasarBit(hexTemp[i]), PasarBit(rcorn[i, subClave]))));
-            }
-            posicion++;
-            // Siguientes Columnas
-            int anteriorClaveActual = 0;
+            int ColumnaAnterior = 1;
+            Hexadecimal[] ColumnaAtras = ultimaColumna;
+            List<Hexadecimal[]> Columnas = new List<Hexadecimal[]>();
+            Columnas.Add(ultimaColumna);
             for (int i = 1; i < 4; i++)
             {
+                Columnas.Add(new Hexadecimal[4]);
                 for (int j = 0; j < 4; j++)
                 {
-                    subclave[j, i] = new Hexadecimal(getStringBit(XOR(ClaveAnterior.valores[j, posicion].getBits(), subclave[j, anteriorClaveActual].getBits())));
+                    transformacion = getXor(ClaveAnterior.valores[j, ColumnaAnterior].getBits(), ColumnaAtras[j].getBits());
+                    Columnas[i][j] = new Hexadecimal(transformacion);
                 }
-                posicion++; anteriorClaveActual++;
+                ColumnaAnterior++;
+                ColumnaAtras = Columnas[Columnas.Count - 1];
             }
-            SubClaves.Add(new BloqueAES(subclave));
+            Hexadecimal[,] MatrizClave = new Hexadecimal[4, 4];
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    MatrizClave[i, j] = Columnas[i][j];
+                }
+            }
+            BloqueAES nuevaClave = new BloqueAES(MatrizClave);
+            SubClaves.Add(nuevaClave);
             if (subClave < 9)
             {
-                subClave = subClave + 1;
-                GenerarSubClaves(SubClaves[SubClaves.Count - 1], 0, subClave);
+                subClave++;
+                GenerarSubClaves(nuevaClave, subClave);
             }
         }
+        #endregion Generadores
 
-        #region Rondas
+        #region Rondas de Cifrado
         private void RondaInicial(BloqueAES bloque, BloqueAES clave)
         {
             bloque = AddRoundKey(bloque, clave);
@@ -186,16 +181,16 @@ namespace LaboratorioEncripcion
             bloque = ShiftRows(bloque);
             bloque = AddRoundKey(bloque, SubClaves[SubClaves.Count - 1]);
         }
-        #endregion Rondas
+        #endregion Rondas de Cifrado
 
-        #region Proceso de las Rondas
+        #region Proceso de las Rondas para Cifrado
         public BloqueAES SubBytes(BloqueAES bloque)
         {
             for (int i = 0; i < 4; i++)
             {
                 for (int j = 0; j < 4; j++)
                 {
-                    bloque.valores[i, j] = new Hexadecimal(buscarSBox(bloque.valores[i, j].getHexadecimal()));
+                    bloque.valores[i, j] = new Hexadecimal(getSBox(bloque.valores[i, j].getHexadecimal()));
                 }
             }
             return bloque;
@@ -212,7 +207,7 @@ namespace LaboratorioEncripcion
                 for (int k = 0; k < rotaciones; k++)
                 {
                     // Se aplica la rotación
-                    for (int j = 1; j < 4; j++)
+                    for (int j = 0; j < 4; j++)
                     {
                         switch (j)
                         {
@@ -220,6 +215,7 @@ namespace LaboratorioEncripcion
                                 temp = bloque.valores[i, j];
                                 break;
                             case 3:
+                                bloque.valores[i, j - 1] = bloque.valores[i, j];
                                 bloque.valores[i, j] = temp;
                                 break;
                             default:
@@ -259,22 +255,63 @@ namespace LaboratorioEncripcion
             {
                 for (int j = 0; j < 4; j++)
                 {
-                    bloque.valores[i, j] = new Hexadecimal(getStringBit(XOR(bloque.valores[i, j].getBits(), clave.valores[i, j].getBits())));
+                    bloque.valores[i, j] = new Hexadecimal(getXor(bloque.valores[i, j].getBits(), clave.valores[i, j].getBits()));
                 }
             }
             return bloque;
         }
-        #endregion Proceso de las Rondas
+        #endregion Proceso de las Rondas para Cifrado
 
-        public void rotarVector(ref Hexadecimal[] vectorFinal, Hexadecimal[] vectorInicial)
+        #region Procesos Generales
+        public Hexadecimal[] SubBytes(Hexadecimal[] vector)
         {
-            vectorFinal[0] = vectorInicial[1];
-            vectorFinal[1] = vectorInicial[2];
-            vectorFinal[2] = vectorInicial[3];
-            vectorFinal[3] = vectorInicial[0];
+            for (int j = 0; j < 4; j++)
+            {
+                vector[j] = new Hexadecimal(getSBox(vector[j].getHexadecimal()));
+            }
+            return vector;
         }
 
-        private String buscarSBox(String dato)
+        public BitArray getBit(String hex)
+        {
+            byte[] datos = new byte[2];
+            for (int i = 0; i < hex.Length; i++)
+            {
+                datos[i] = Convert.ToByte(hex[i]);
+            }
+            if (hex.Length < 2)
+            {
+                datos[1] = datos[0];
+                datos[0] = 0;
+            }
+            return new BitArray(datos);
+        }
+
+        private void inicializarTransformacion()
+        {
+            Hexadecimal[,] matrizHexa = new Hexadecimal[4, 4];
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    matrizHexa[i, j] = new Hexadecimal(transformacion[i, j]);
+                }
+            }
+            TransformacionDinamica = new BloqueAES(matrizHexa);
+        }
+
+        public Hexadecimal[] Rotword(Hexadecimal[] vectorInicial)
+        {
+            Hexadecimal temp = vectorInicial[0];
+            for (int i = 1; i < vectorInicial.Length; i++)
+            {
+                vectorInicial[i - 1] = vectorInicial[i];
+            }
+            vectorInicial[vectorInicial.Length - 1] = temp;
+            return vectorInicial;
+        }
+
+        private String getSBox(String dato)
         {
             int f = 0; int c = 0;
             dato = dato.ToLower();
@@ -306,7 +343,7 @@ namespace LaboratorioEncripcion
             return Convert.ToString(valor, 16).ToUpper();
         }
 
-        public BitArray XOR(BitArray dato1, BitArray dato2)
+        public String getXor(BitArray dato1, BitArray dato2)
         {
             bool[] bitsSalida = new bool[8];
             for (int i = 0; i < 8; i++)
@@ -320,7 +357,7 @@ namespace LaboratorioEncripcion
                     bitsSalida[i] = true;
                 }
             }
-            return new BitArray(bitsSalida);
+            return getStringBit(new BitArray(bitsSalida));
         }
 
         public string Hashear(MD5 hasher, string entrada)
@@ -333,9 +370,14 @@ namespace LaboratorioEncripcion
             }
             return hashed.ToString();
         }
+        #endregion Procesos Generales
 
         public String Cifrar()
         {
+            for (int i = 0; i < Bloques.Count; i++)
+            {
+                RondaInicial(Bloques[i], Clave);
+            }
             StringBuilder Cifrado = new StringBuilder();
             for (int i = 0; i < Bloques.Count; i++)
             {

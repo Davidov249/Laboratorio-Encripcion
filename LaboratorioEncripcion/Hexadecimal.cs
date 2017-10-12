@@ -29,14 +29,12 @@ namespace LaboratorioEncripcion
 
         public int getDecimal()
         {
-            //decimal temp = 0;
-            //Decimal.TryParse(ValorHex, System.Globalization.NumberStyles.HexNumber, null, out temp);
             return Convert.ToInt32(ValorHex, 16);
         }
 
         public String getHexadecimal()
         {
-            ValorHex = Convert.ToString(Convert.ToInt32(ValorDec), 16).ToUpper();
+            ValorHex = Convert.ToString(Convert.ToInt32(ValorDec), 16).ToLower();
             if (ValorHex.Length == 1)
             {
                 ValorHex = "0" + ValorHex;
