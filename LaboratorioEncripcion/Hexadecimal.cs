@@ -18,7 +18,8 @@ namespace LaboratorioEncripcion
         public Hexadecimal(int valorDecimal)
         {
             ValorDec = valorDecimal;
-            ValorHex = valorDecimal.ToString("X");
+            string c1 = Convert.ToString(Convert.ToInt32(ValorDec), 16).ToLower();
+            ValorHex = c1;
         }
 
         public Hexadecimal(String valorHexadecimal)

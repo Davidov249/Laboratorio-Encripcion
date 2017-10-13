@@ -40,6 +40,16 @@ namespace LaboratorioEncripcion
             valores = matriz;
         }
 
+        public Hexadecimal[] getFila(int fila)
+        {
+            Hexadecimal[] retorno = new Hexadecimal[4];
+            for (int i = 0; i < 4; i++)
+            {
+                retorno[i] = valores[fila, i];
+            }
+            return retorno;
+        }
+
         public Hexadecimal[] getVector(int columna)
         {
             Hexadecimal[] retorno = new Hexadecimal[4];
