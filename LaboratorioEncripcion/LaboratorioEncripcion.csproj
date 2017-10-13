@@ -44,7 +44,10 @@
   <ItemGroup>
     <Compile Include="AES-128.cs" />
     <Compile Include="BloqueAES.cs" />
+    <Compile Include="DatoHuffman.cs" />
     <Compile Include="Hexadecimal.cs" />
+    <Compile Include="Huffman.cs" />
+    <Compile Include="NodoHuffman.cs" />
     <Compile Include="PGP.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

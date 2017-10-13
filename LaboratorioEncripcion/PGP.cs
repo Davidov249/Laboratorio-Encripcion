@@ -13,6 +13,7 @@ namespace LaboratorioEncripcion
     {
         private RSA Claves { get; set; }
         private AES_128 Cifrado { get; set; }
+        private Huffman Compresion { get; set; }
         private string Archivo { get; set; }
         private string Salida { get; set; }
 
@@ -62,7 +63,8 @@ namespace LaboratorioEncripcion
                 StreamWriter escritor = new StreamWriter(@"c:\cript\key" + salida + ".clp");
                 escritor.WriteLine(Claves.llavePrivada());
                 escritor.Close();
-                Cifrado = new AES_128(archivo, Claves.llavePrivada(), cifrar);
+                Compresion = new Huffman(archivo);
+                Cifrado = new AES_128(Compresion.Comprimir(), Claves.llavePrivada(), cifrar);
             }
         }
 

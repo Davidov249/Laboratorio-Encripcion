@@ -148,7 +148,7 @@ namespace LaboratorioEncripcion
         #region Rondas de Cifrado
         private void RondaInicial(BloqueAES bloque, BloqueAES clave)
         {
-            bloque = AddRoundKey(bloque, clave);
+            //bloque = AddRoundKey(bloque, clave);
             RondasEstandar(bloque, 0);
         }
 
@@ -157,7 +157,7 @@ namespace LaboratorioEncripcion
             bloque = SubBytes(bloque);
             bloque = ShiftRows(bloque);
             bloque = MixColumns(bloque);
-            bloque = AddRoundKey(bloque, SubClaves[pasada]);
+            //bloque = AddRoundKey(bloque, SubClaves[pasada]);
             if (pasada < 9)
             {
                 pasada++;
