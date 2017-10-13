@@ -29,7 +29,7 @@ namespace LaboratorioEncripcion
             Query = Console.ReadLine();
             string archivo = "";
             string clave = "";
-            string salida = "";
+            string salida = "@";
             string[] texto = Query.Split(' ');
             if (texto[0] == "-c")
             {
