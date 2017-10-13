@@ -70,7 +70,20 @@ namespace LaboratorioEncripcion
 
         public PGP(string archivoDescifrar, string clavePrivada)
         {
-
+            Archivo = archivoDescifrar;
+            StreamReader lector = new StreamReader(clavePrivada);
+            String privada = lector.ReadLine();
+            lector.Close();
+            StringBuilder cifrado = new StringBuilder();
+            lector = new StreamReader(archivoDescifrar);
+            string linea = lector.ReadLine();
+            while (linea != null && linea != "")
+            {
+                cifrado.Append(linea);
+                linea = lector.ReadLine();
+            }
+            lector.Close();
+            Cifrado = new AES_128(cifrado.ToString(), privada, false);
         }
 
         public void Cifrar()
@@ -87,6 +100,26 @@ namespace LaboratorioEncripcion
             StreamWriter escritor = new StreamWriter(final);
             string cifrado = Cifrado.Cifrar();
             escritor.WriteLine(cifrado);
+            escritor.Close();
+        }
+
+        public void Descifrar()
+        {
+
+            String descifrado = Cifrado.Descifrar();
+            Compresion = new Huffman(descifrado);
+            descifrado = Compresion.Descomprimir();
+            string[] salida = Archivo.Split('.');
+            string final = "";
+            for (int i = 0; i < salida.Length - 1; i++)
+            {
+                if (i == salida.Length - 2)
+                    final += salida[i];
+                else
+                    final += salida[i] + ".";
+            }
+            StreamWriter escritor = new StreamWriter(final);
+            escritor.WriteLine(descifrado);
             escritor.Close();
         }
     }

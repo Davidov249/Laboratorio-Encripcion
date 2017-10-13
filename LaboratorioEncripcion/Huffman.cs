@@ -10,18 +10,32 @@ namespace LaboratorioEncripcion
     public class Huffman
     {
         private List<DatoHuffman> CaracteresProbabilidades = null;
+        private BinaryReader LectorBinario = null;
         private List<NodoHuffman> Nodos = null;
         private List<NodoHuffman> Hojas = null;
         private NodoHuffman _raiz = null;
         private StreamReader Lector = null;
         List<string> textoComprimir = null;
         List<string> textoCompreso = null;
+        String ArchivoEntrada = "";
+        int siguiente = -1;
 
         public Huffman(String Entrada)
         {
+            ArchivoEntrada = Entrada;
+        }
+
+        private String getString()
+        {
+            siguiente++;
+            return ArchivoEntrada[siguiente].ToString();
+        }
+
+        public String Comprimir()
+        {
             textoComprimir = new List<string>();
             textoCompreso = new List<string>();
-            Lector = new StreamReader(Entrada);
+            Lector = new StreamReader(ArchivoEntrada);
             CaracteresProbabilidades = new List<DatoHuffman>();
             String Caracter = LeerSiguiente(); int existe = -1;
             int Total = 0;
@@ -72,10 +86,6 @@ namespace LaboratorioEncripcion
             InOrdenAsignar(_raiz, "");
             Hojas = new List<NodoHuffman>();
             InOrden(_raiz);
-        }
-
-        public String Comprimir()
-        {
             String CadenaEscribir = "";
             Dictionary<string, string> tabla = new Dictionary<string, string>();
             for (int i = 0; i < Hojas.Count; i++)
@@ -150,6 +160,75 @@ namespace LaboratorioEncripcion
                     }
                 }
             }
+        }
+
+        private void cargarDiccionarioHuffman()
+        {
+            bool continuar = true;
+            String caracter = ""; String apariciones = "";
+            String actual, siguiente = "";
+            actual = "";
+            Nodos = new List<NodoHuffman>();
+            while (continuar)
+            {
+                actual = getString();
+                caracter = actual;
+                actual = getString();
+                while (actual != " " && actual != "/")
+                {
+                    apariciones += actual;
+                    actual = getString();
+                }
+                Nodos.Add(new NodoHuffman(new DatoHuffman(caracter), ""));
+                Nodos[Nodos.Count - 1].Codigo = apariciones;
+                if (actual == "/")
+                {
+                    siguiente = getString();
+                    if (siguiente == "/")
+                    {
+                        continuar = false;
+                    }
+                    else
+                    {
+                        actual = siguiente;
+                    }
+                }
+                apariciones = "";
+            }
+        }
+
+        private int reemplazarCaracter(String cadenaBinario)
+        {
+            for (int i = 0; i < Nodos.Count; i++)
+            {
+                if (Nodos[i].Codigo.Equals(cadenaBinario))
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        public String Descomprimir()
+        {
+            cargarDiccionarioHuffman();
+            StringBuilder CadenaFinal = new StringBuilder();
+            String cadenaDesc = getString();
+            int posicion = 0;
+            while (cadenaDesc != null && cadenaDesc != "" && cadenaDesc != "\uffff")
+            {
+                posicion = reemplazarCaracter(cadenaDesc);
+                if (posicion != -1)
+                {
+                    CadenaFinal.Append(Nodos[posicion].Dato.Caracter);
+                    cadenaDesc = getString();
+                }
+                else
+                {
+                    cadenaDesc += getString();
+                }
+            }
+            return CadenaFinal.ToString();
         }
 
         private String LeerSiguiente()

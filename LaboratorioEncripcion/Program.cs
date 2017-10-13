@@ -10,10 +10,10 @@ namespace LaboratorioEncripcion
     {
         static void Main(string[] args)
         {
-            string archivo = @"C:\Users\Axel Rodriguez\Downloads\git-commands.txt";
-            string salida = "bb";
-            PGP pgp = new PGP("EzioA", "pgp123", true, archivo, salida);
-            pgp.Cifrar();
+            string archivo = @"C:\Users\Axel Rodriguez\Downloads\git-commandsbb.txt.cif";
+            string salida = @"C:\cript\keybb.clp";
+            PGP pgp = new PGP(archivo, salida);
+            pgp.Descifrar();
         }
     }
 }
