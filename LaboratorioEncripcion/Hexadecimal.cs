@@ -17,6 +17,8 @@ namespace LaboratorioEncripcion
 
         public Hexadecimal(int valorDecimal)
         {
+            if (valorDecimal == 65533)
+                valorDecimal = 32;
             ValorDec = valorDecimal;
             string c1 = Convert.ToString(Convert.ToInt32(ValorDec), 16).ToLower();
             ValorHex = c1;
@@ -24,6 +26,8 @@ namespace LaboratorioEncripcion
 
         public Hexadecimal(String valorHexadecimal)
         {
+            if (valorHexadecimal.ToLower() == "fffd")
+                valorHexadecimal = "20";
             ValorHex = valorHexadecimal;
             ValorDec = Convert.ToInt32(valorHexadecimal, 16);
         }
@@ -35,7 +39,7 @@ namespace LaboratorioEncripcion
 
         public String getHexadecimal()
         {
-            ValorHex = Convert.ToString(Convert.ToInt32(ValorDec), 16).ToLower();
+            ValorHex = Convert.ToString(ValorDec, 16).ToLower();
             if (ValorHex.Length == 1)
             {
                 ValorHex = "0" + ValorHex;

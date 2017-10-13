@@ -68,6 +68,11 @@ namespace LaboratorioEncripcion
             }
         }
 
+        public PGP(string archivoDescifrar, string clavePrivada)
+        {
+
+        }
+
         public void Cifrar()
         {
             string[] ubicacion = Archivo.Split('.');

@@ -80,10 +80,6 @@ namespace LaboratorioEncripcion
             }
             if (contadorCaracteres < 15)
             {
-                for (int i = contadorCaracteres; i <= 15; i++)
-                {
-                    caracteres[contadorCaracteres] = ' ';
-                }
                 Bloques.Add(new BloqueAES(caracteres));
             }
         }
@@ -148,7 +144,6 @@ namespace LaboratorioEncripcion
         #region Rondas de Cifrado
         private void RondaInicial(BloqueAES bloque, BloqueAES clave)
         {
-            //bloque = AddRoundKey(bloque, clave);
             RondasEstandar(bloque, 0);
         }
 
@@ -157,7 +152,6 @@ namespace LaboratorioEncripcion
             bloque = SubBytes(bloque);
             bloque = ShiftRows(bloque);
             bloque = MixColumns(bloque);
-            //bloque = AddRoundKey(bloque, SubClaves[pasada]);
             if (pasada < 9)
             {
                 pasada++;
@@ -173,9 +167,28 @@ namespace LaboratorioEncripcion
         {
             bloque = SubBytes(bloque);
             bloque = ShiftRows(bloque);
-            bloque = AddRoundKey(bloque, SubClaves[SubClaves.Count - 1]);
         }
         #endregion Rondas de Cifrado
+
+        #region Rondas de Descifrado
+        private void RondaInicialInv(BloqueAES bloque   , BloqueAES clave)
+        {
+            bloque = ShiftRowsInv(bloque);
+            bloque = SubBytesInv(bloque);
+        }
+
+        private void RondasEstandarInv(BloqueAES bloque, int pasada)
+        {
+            bloque = MixColumnsInv(bloque);
+            bloque = ShiftRowsInv(bloque);
+            bloque = SubBytes(bloque);
+            if (pasada < 9)
+            {
+                pasada++;
+                RondasEstandarInv(bloque, pasada);
+            }
+        }
+        #endregion Rondas de Descifrado
 
         #region Proceso de las Rondas para Cifrado
         private BloqueAES SubBytes(BloqueAES bloque)
@@ -252,7 +265,80 @@ namespace LaboratorioEncripcion
         }
         #endregion Proceso de las Rondas para Cifrado
 
+        #region Proceso de las Rondas para Descifrado
+        private BloqueAES SubBytesInv(BloqueAES bloque)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    bloque.valores[i, j] = getSBoxInv(bloque.valores[i, j].getHexadecimal());
+                }
+            }
+            return bloque;
+        }
+
+        private BloqueAES ShiftRowsInv(BloqueAES bloque)
+        {
+            Hexadecimal temp = null;
+            int rotaciones = 1;
+            for (int i = 1; i < 4; i++)
+            {
+                for (int k = 0; k < rotaciones; k++)
+                {
+                    for (int j = 3; j >= 0; j--)
+                    {
+                        switch (j)
+                        {
+                            case 3:
+                                temp = bloque.valores[i, j];
+                                break;
+                            case 0:
+                                bloque.valores[i, j + 1] = bloque.valores[i, j];
+                                bloque.valores[i, j] = temp;
+                                break;
+                            default:
+                                bloque.valores[i, j + 1] = bloque.valores[i, j];
+                                break;
+                        }
+                    }
+                }
+                rotaciones++;
+            }
+            return bloque;
+        }
+
+        private BloqueAES MixColumnsInv(BloqueAES bloque)
+        {
+            Hexadecimal dato = null;
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    dato = MultiplicacionVectores(TransformacionDinamica.getFila(i), bloque.getVector(j));
+                    bloque.valores[i, j] = dato;
+                }
+            }
+            return bloque;
+        }
+        #endregion Proceso de las Rondas para Descifrado
+
         #region Procesos Generales
+        private Hexadecimal getSBoxInv(String datoHexa)
+        {
+            for (int i = 1; i < 17; i++)
+            {
+                for (int j = 1; j < 17; j++)
+                {
+                    if (datoHexa.ToLower() == sBox[i, j].ToLower())
+                    {
+                        return new Hexadecimal(sBox[i, j]);
+                    }
+                }
+            }
+            return null;
+        }
+
         private Hexadecimal MultiplicacionVectores(Hexadecimal[] Fila, Hexadecimal[] Columna)
         {
             int dato = 0;
@@ -402,6 +488,26 @@ namespace LaboratorioEncripcion
                 }
             }
             return Cifrado.ToString();
+        }
+
+        public String Descifrar()
+        {
+            for (int i = 0; i < Bloques.Count; i++)
+            {
+                RondaInicialInv(Bloques[i], Clave);
+            }
+            StringBuilder Descifrado = new StringBuilder();
+            for (int i = 0; i < Bloques.Count; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    for (int k = 0; k < 4; k++)
+                    {
+                        Descifrado.Append(Bloques[i].valores[j, k].getString());
+                    }
+                }
+            }
+            return Descifrado.ToString();
         }
     }
 }
