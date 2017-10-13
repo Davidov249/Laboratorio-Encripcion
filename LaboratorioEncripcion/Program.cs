@@ -29,7 +29,7 @@ namespace LaboratorioEncripcion
             Query = Console.ReadLine();
             string archivo = "";
             string clave = "";
-            string salida = "@";
+            string salida = "";
             string[] texto = Query.Split(' ');
             if (texto[0] == "-c")
             {
@@ -41,7 +41,7 @@ namespace LaboratorioEncripcion
                 }
                 int maxim = texto[1].Length;
                 char[] chars = texto[1].ToCharArray();
-                for (int i = 2; i < maxim; i++)
+                for (int i = 3; i < maxim - 1; i++)
                 {
                     salida += chars[i].ToString();
                 }

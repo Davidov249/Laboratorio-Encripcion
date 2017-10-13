@@ -60,7 +60,13 @@ namespace LaboratorioEncripcion
                 conexion.Close();
                 Claves = new RSA(p, q);
                 System.IO.Directory.CreateDirectory(@"c:\cript");
-                StreamWriter escritor = new StreamWriter(@"c:\cript\key" + salida + ".clp");
+                char[] chars = salida.ToCharArray();
+                string salida2 = "";
+                for (int i = 2; i < chars.Length; i++)
+                {
+                    salida2 += chars[i].ToString();
+                }
+                StreamWriter escritor = new StreamWriter(@"c:\cript\key" + salida2 + ".clp");
                 escritor.WriteLine(Claves.llavePrivada());
                 escritor.Close();
                 Compresion = new Huffman(archivo);
